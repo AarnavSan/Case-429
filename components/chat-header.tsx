@@ -5,7 +5,7 @@ export default function ChatHeader() {
         <span className="text-white text-lg">🕵️</span>
       </div>
       <div>
-        <div className="text-[#000000] font-medium">To: Sherlock</div>
+        <div className="text-[#000000] font-medium">From: Sherlock</div>
       </div>
     </div>
   )

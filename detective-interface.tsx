@@ -2,15 +2,21 @@
 
 import { useState } from "react"
 import MacOSMenuBar from "./components/macos-menu-bar"
-import ChatPanel from "./components/chat-panel"
+import ChatController from "./components/chat-system/chat-controller"
 import DocumentWindow from "./components/document-window"
-import ProfileCard from "./components/profile-card"
+import FileSystemPanel from "./components/file-system-panel"
 
 export default function DetectiveInterface() {
   const [verdict, setVerdict] = useState<"guilty" | "not-guilty" | null>(null)
 
-  const handleVerdictSelect = (selectedVerdict: "guilty" | "not-guilty") => {
-    setVerdict(selectedVerdict)
+  const handleVerdictSelect = (selectedVerdict: string) => {
+    setVerdict(selectedVerdict as "guilty" | "not-guilty")
+  }
+
+  const handleEvidenceClick = (evidenceFile: string) => {
+    // This will be handled by the FileSystemPanel to open the evidence file
+    console.log("Opening evidence file:", evidenceFile)
+    // You can implement this to automatically open the corresponding file
   }
 
   return (
@@ -18,9 +24,9 @@ export default function DetectiveInterface() {
       <MacOSMenuBar />
 
       <div className="flex h-[calc(100vh-24px)] p-6 gap-6">
-        <ChatPanel verdict={verdict} onVerdictSelect={handleVerdictSelect} />
-        <DocumentWindow />
-        <ProfileCard />
+        <ChatController onVerdictSelected={handleVerdictSelect} />
+        <DocumentWindow verdictSelected={!!verdict} onEvidenceClick={handleEvidenceClick} />
+        <FileSystemPanel />
       </div>
     </div>
   )

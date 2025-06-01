@@ -5,12 +5,26 @@ import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import DocumentHeader from "./document-header"
 import DocumentContent from "./document-content"
+import { useWindowResize } from "../hooks/use-window-resize"
+import ResizeHandles from "./windows/resize-handles"
 
-export default function DocumentWindow() {
+interface DocumentWindowProps {
+  verdictSelected?: boolean
+  onEvidenceClick?: (evidenceFile: string) => void
+}
+
+export default function DocumentWindow({ verdictSelected = false, onEvidenceClick }: DocumentWindowProps) {
   const [windowPosition, setWindowPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const [highlighterColor, setHighlighterColor] = useState<"green" | "red" | "purple" | null>(null)
   const windowRef = useRef<HTMLDivElement>(null)
+
+  const { size, isResizing, handleResizeStart, getCursorForHandle } = useWindowResize({
+    initialSize: { width: 700, height: 600 },
+    minSize: { width: 500, height: 400 },
+    maxSize: { width: 1000, height: 800 },
+  })
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true)
@@ -20,6 +34,11 @@ export default function DocumentWindow() {
     })
   }
 
+  const handleHighlighterColorSelect = (color: "green" | "red" | "purple" | null) => {
+    if (verdictSelected) return // Disable highlighter in game mode
+    setHighlighterColor(color)
+  }
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging) return
@@ -27,7 +46,6 @@ export default function DocumentWindow() {
       const newX = e.clientX - dragStart.x
       const newY = e.clientY - dragStart.y
 
-      // Constrain to viewport bounds
       const maxX = window.innerWidth - (windowRef.current?.offsetWidth || 0)
       const maxY = window.innerHeight - (windowRef.current?.offsetHeight || 0)
 
@@ -56,14 +74,28 @@ export default function DocumentWindow() {
     <div className="flex-1 flex justify-center items-start pt-12">
       <div
         ref={windowRef}
-        className="bg-white rounded-lg shadow-2xl w-full max-w-2xl transition-transform duration-75"
+        className="bg-white rounded-lg shadow-2xl transition-transform duration-75 relative"
         style={{
           transform: `translate(${windowPosition.x}px, ${windowPosition.y}px)`,
           cursor: isDragging ? "grabbing" : "default",
+          width: `${size.width}px`,
+          height: `${size.height}px`,
         }}
       >
-        <DocumentHeader onMouseDown={handleMouseDown} isDragging={isDragging} />
-        <DocumentContent />
+        <DocumentHeader
+          onMouseDown={handleMouseDown}
+          isDragging={isDragging}
+          highlighterColor={highlighterColor}
+          onHighlighterColorSelect={handleHighlighterColorSelect}
+          gameMode={verdictSelected}
+        />
+        <DocumentContent
+          highlighterColor={highlighterColor}
+          height={size.height - 60}
+          verdictSelected={verdictSelected}
+          onEvidenceClick={onEvidenceClick}
+        />
+        <ResizeHandles onResizeStart={handleResizeStart} getCursorForHandle={getCursorForHandle} />
       </div>
     </div>
   )

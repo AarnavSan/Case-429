@@ -1,0 +1,104 @@
+{
+  "suspects": [
+    {
+      "name": "Flora Jasmine",
+      "summaryEntries": [
+        {
+          "phrase_number": 1,
+          "type": "green",
+          "evidence_file": "personal-profile"
+        },
+        {
+          "phrase_number": 2,
+          "type": "red",
+          "evidence_file": "police-statement"
+        },
+        {
+          "phrase_number": 3,
+          "type": "red",
+          "evidence_file": "police-statement"
+        },
+        {
+          "phrase_number": 4,
+          "type": "green",
+          "evidence_file": "timeline-analysis"
+        },
+        {
+          "phrase_number": 5,
+          "type": "green",
+          "evidence_file": "academic-research"
+        },
+        {
+          "phrase_number": 6,
+          "type": "green",
+          "evidence_file": "financial-records"
+        },
+        {
+          "phrase_number": 7,
+          "type": "red",
+          "evidence_file": "timeline-analysis"
+        },
+        {
+          "phrase_number": 8,
+          "type": "purple",
+          "evidence_file": null
+        },
+        {
+          "phrase_number": 9,
+          "type": "purple",
+          "evidence_file": null
+        },
+        {
+          "phrase_number": 10,
+          "type": "green",
+          "evidence_file": "financial-records"
+        },
+        {
+          "phrase_number": 11,
+          "type": "red",
+          "evidence_file": "timeline-analysis"
+        },
+        {
+          "phrase_number": 12,
+          "type": "purple",
+          "evidence_file": null
+        },
+        {
+          "phrase_number": 13,
+          "type": "purple",
+          "evidence_file": null
+        },
+        {
+          "phrase_number": 14,
+          "type": "green",
+          "evidence_file": "academic-research"
+        },
+        {
+          "phrase_number": 15,
+          "type": "green",
+          "evidence_file": "timeline-analysis"
+        },
+        {
+          "phrase_number": 16,
+          "type": "green",
+          "evidence_file": "timeline-analysis"
+        },
+        {
+          "phrase_number": 17,
+          "type": "green",
+          "evidence_file": "timeline-analysis"
+        },
+        {
+          "phrase_number": 18,
+          "type": "green",
+          "evidence_file": "timeline-analysis"
+        },
+        {
+          "phrase_number": 19,
+          "type": "green",
+          "evidence_file": "timeline-analysis"
+        }
+      ]
+    }
+  ]
+}

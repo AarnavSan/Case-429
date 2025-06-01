@@ -1,7 +1,11 @@
+"use client"
+
+import { useState } from "react"
 import ChatHeader from "./chat-header"
 import ChatMessage from "./chat-message"
 import VerdictButtons from "./verdict-buttons"
 import ChatInput from "./chat-input"
+import WatsonMessage from "./watson-message"
 
 interface ChatPanelProps {
   verdict: "guilty" | "not-guilty" | null
@@ -9,14 +13,33 @@ interface ChatPanelProps {
 }
 
 export default function ChatPanel({ verdict, onVerdictSelect }: ChatPanelProps) {
-  const messages = [
-    "The guilty of murder evidence is not sufficient to convict her.",
-    "My dear, dear, Watson...",
-    "It looks like your misclassification of the information in the AI summary or accepting misrepresentations as facts led you to overlook a lot of ambiguity involved in this summary! Here's a corrected sheet...review it to avoid future mistakes!",
-    "The timeline doesn't add up, Holmes. There are gaps in her alibi.",
-    "Elementary! But we must consider all possibilities. The evidence suggests premeditation, yet something feels amiss about this entire case.",
-    "What about the financial records? They show irregular transactions.",
-    "Precisely, Watson. Follow the money trail - it often reveals more than testimonies ever could.",
+  const [showFullConversation, setShowFullConversation] = useState(false)
+
+  // Handle verdict selection
+  const handleVerdictSelect = (selectedVerdict: "guilty" | "not-guilty") => {
+    onVerdictSelect(selectedVerdict)
+    // Show the rest of the conversation after a short delay
+    setTimeout(() => {
+      setShowFullConversation(true)
+    }, 1000)
+  }
+
+  const initialMessage =
+    "Watson, the evidence against Flora Jasmine appears substantial, but I sense there are layers to this case we haven't yet uncovered. What's your assessment?"
+
+  const verdictResponses = {
+    guilty:
+      "Interesting conclusion, Watson. While the evidence does point in that direction, I wonder if we're being led too easily to the obvious suspect. The removal from the will creates a compelling motive, but remember - timing can be coincidental.",
+    "not-guilty":
+      "A bold stance, Watson, given the circumstantial evidence. Yet your instincts may be correct - her defensive tone could be interpreted as fear rather than guilt. The timeline has several inconsistencies that trouble me.",
+  }
+
+  const followUpMessages = [
+    "My dear Watson, observe the timeline carefully...",
+    "The financial motive is clear, but consider the emotional state described in that voicemail.",
+    "Elementary! The witness testimony troubles me. The housekeeper's account seems almost too convenient.",
+    "What strikes you about the security footage? Notice the timestamp discrepancy?",
+    "Precisely, my friend. In cases of this magnitude, we must separate emotion from evidence, speculation from fact.",
   ]
 
   return (
@@ -24,25 +47,36 @@ export default function ChatPanel({ verdict, onVerdictSelect }: ChatPanelProps) 
       <ChatHeader />
 
       <div className="flex-1 bg-[#5b8bd8] p-4 space-y-4 overflow-y-auto">
-        <ChatMessage message={messages[0]} />
+        {/* Initial message from Sherlock */}
+        <ChatMessage message={initialMessage} />
 
-        <VerdictButtons verdict={verdict} onVerdictSelect={onVerdictSelect} />
+        {/* Show verdict buttons if no verdict selected yet */}
+        {!verdict && <VerdictButtons onVerdictSelect={handleVerdictSelect} />}
 
-        <ChatMessage message={messages[1]} />
+        {/* Show Watson's response once verdict is selected */}
+        {verdict && (
+          <WatsonMessage
+            message={
+              verdict === "guilty" ? "I think they are guilty, Sherlock." : "I think they are not guilty, Sherlock."
+            }
+          />
+        )}
 
-        <ChatMessage message={messages[2]} maxWidth="max-w-[280px]" />
+        {/* Show Sherlock's response to the verdict */}
+        {verdict && <ChatMessage message={verdictResponses[verdict]} />}
 
-        <ChatMessage message={messages[3]} />
+        {/* Show the rest of the conversation after verdict response */}
+        {showFullConversation && (
+          <>
+            {followUpMessages.map((message, index) => (
+              <ChatMessage key={index} message={message} maxWidth={index % 2 === 0 ? "max-w-[280px]" : undefined} />
+            ))}
 
-        <ChatMessage message={messages[4]} maxWidth="max-w-[280px]" />
-
-        <ChatMessage message={messages[5]} />
-
-        <ChatMessage message={messages[6]} maxWidth="max-w-[280px]" />
-
-        <div className="flex justify-center pt-4">
-          <div className="text-white text-2xl">•••</div>
-        </div>
+            <div className="flex justify-center pt-4">
+              <div className="text-white text-2xl">•••</div>
+            </div>
+          </>
+        )}
       </div>
 
       <ChatInput />

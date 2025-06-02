@@ -11,9 +11,14 @@ import ResizeHandles from "./windows/resize-handles"
 interface DocumentWindowProps {
   verdictSelected?: boolean
   onEvidenceClick?: (evidenceFile: string) => void
+  onHighlightAccuracyCheck?: (results: { correct: number; incorrect: number; total: number }) => void
 }
 
-export default function DocumentWindow({ verdictSelected = false, onEvidenceClick }: DocumentWindowProps) {
+export default function DocumentWindow({
+  verdictSelected = false,
+  onEvidenceClick,
+  onHighlightAccuracyCheck,
+}: DocumentWindowProps) {
   const [windowPosition, setWindowPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
@@ -94,6 +99,7 @@ export default function DocumentWindow({ verdictSelected = false, onEvidenceClic
           height={size.height - 60}
           verdictSelected={verdictSelected}
           onEvidenceClick={onEvidenceClick}
+          onHighlightAccuracyCheck={onHighlightAccuracyCheck}
         />
         <ResizeHandles onResizeStart={handleResizeStart} getCursorForHandle={getCursorForHandle} />
       </div>

@@ -5,9 +5,13 @@ import ChatEngine from "./chat-engine"
 
 interface ChatControllerProps {
   onVerdictSelected?: (verdict: string) => void
+  highlightResults?: { correct: number; incorrect: number; total: number }
 }
 
-export default function ChatController({ onVerdictSelected }: ChatControllerProps) {
+export default function ChatController({
+  onVerdictSelected,
+  highlightResults = { correct: 0, incorrect: 0, total: 0 },
+}: ChatControllerProps) {
   useEffect(() => {
     // Initialize the conversation
     const startConversation = () => {
@@ -16,6 +20,12 @@ export default function ChatController({ onVerdictSelected }: ChatControllerProp
         // Retry if chat engine not ready
         setTimeout(startConversation, 100)
         return
+      }
+
+      // Add method to set highlight results
+      chatEngine.setHighlightResults = (results: { correct: number; incorrect: number; total: number }) => {
+        // Store the results for later use
+        chatEngine.highlightResults = results
       }
 
       // Start with Sherlock's opening message
@@ -79,6 +89,7 @@ export default function ChatController({ onVerdictSelected }: ChatControllerProp
             { label: "The evidence is not sufficient to convict Flora", value: "not-guilty" },
           ],
           (decision: string) => {
+            // ONLY call onVerdictSelected for the actual verdict choice
             onVerdictSelected?.(decision)
             handleFinalVerdict(decision)
           },
@@ -91,24 +102,77 @@ export default function ChatController({ onVerdictSelected }: ChatControllerProp
     const chatEngine = (window as any).chatEngine
     if (!chatEngine) return
 
-    // Sherlock's response based on verdict
-    const responses = {
-      guilty: [
-        "Hmm, Watson. While I understand the evidence appears compelling, I believe we must look deeper.",
-        "The AI's analysis contains several concerning inconsistencies that suggest Flora may be innocent.",
-        "Continue investigating the highlighted claims to uncover the truth.",
-      ],
-      "not-guilty": [
-        "Excellent instincts, Watson! You're absolutely right to question this evidence.",
-        "The AI's analysis contains several fabrications and misrepresentations that cast serious doubt on Flora's guilt.",
-        "Now we must prove it by examining each claim carefully.",
-      ],
-    }
-
+    // Wait a bit to ensure highlight results have been calculated
     setTimeout(() => {
-      chatEngine.pushMessages(responses[verdict as keyof typeof responses])
-    }, 1000)
+      const results = chatEngine.highlightResults || { correct: 0, incorrect: 0, total: 0 }
+      const allCorrect = results.incorrect === 0 && results.total > 0
+
+      // Different responses based on verdict and highlight accuracy
+      if (verdict === "not-guilty") {
+        if (allCorrect) {
+          chatEngine.pushMessages([
+            `I told you so! You got ${results.correct} out of ${results.total} classifications correct - perfect score!`,
+            "Here, you can access files on whoever you want now to find the actual killer.",
+            "All the individuals involved in the case have AI summaries associated with them to help you save time. I think that thing does a decent job of extracting key information for the files.",
+            "Also, I took a look at your highlights on the AI summary, good job on classifying those different pieces of information. Your attention to detail will come in handy for solving the case!",
+          ])
+        } else {
+          chatEngine.pushMessages([
+            `I told you so! However, you got ${results.correct} correct and ${results.incorrect} incorrect out of ${results.total} classifications.`,
+            "Here, you can access files on whoever you want now to find the actual killer.",
+            "All the individuals involved in the case have AI summaries associated with them to help you save time. I think that thing does a decent job of extracting key information for the files.",
+            "However, before we jump onto solving the case, I took a look at your highlights on the AI summaries, and looks like you might have wrongly classified certain pieces of information.",
+            "Here's a corrected sheet…review it to avoid future mistakes!",
+          ])
+        }
+      } else {
+        // guilty verdict
+        if (allCorrect) {
+          chatEngine.pushMessages([
+            `My dear dear Watson, you got ${results.correct} out of ${results.total} classifications correct, but even after classifying all those pieces of information correctly and looking at all the facts and misrepresentations you don't think there's a lot of ambiguity involved?!`,
+            "Take my word on this one and investigate the case further to find the real killer.",
+          ])
+        } else {
+          chatEngine.pushMessages([
+            `My dear dear Watson, you got ${results.correct} correct and ${results.incorrect} incorrect out of ${results.total} classifications.`,
+            "Looks like your misclassification of the different pieces of information in the AI summary or accepting misrepresentations as facts led you to overlook a lot of ambiguity involved in this summary!",
+            "Here's a corrected sheet…review it to avoid future mistakes!",
+            "Now, take my word on this one and investigate the case further to find the real killer.",
+          ])
+        }
+      }
+
+      // After feedback, show next step option
+      setTimeout(
+        () => {
+          chatEngine.pushDecision(
+            [
+              {
+                label: "It's inconclusive that Flora is the murderer. I definitely need to dig deeper.",
+                value: "dig-deeper",
+              },
+            ],
+            (decision: string) => {
+              handleDigDeeperResponse()
+            },
+          )
+        },
+        verdict === "not-guilty" ? 10000 : 8000,
+      )
+    }, 2000)
   }
 
-  return <ChatEngine onDecisionMade={onVerdictSelected} />
+  const handleDigDeeperResponse = () => {
+    const chatEngine = (window as any).chatEngine
+    if (!chatEngine) return
+
+    chatEngine.pushMessages([
+      "Excellent! Now you're thinking like a true detective.",
+      "Let's examine the other suspects more closely. I've unlocked all the case files for you.",
+      "Remember to apply the same critical thinking to all the AI summaries - they're not always reliable!",
+    ])
+  }
+
+  // Don't pass onVerdictSelected to ChatEngine since we handle it manually
+  return <ChatEngine />
 }

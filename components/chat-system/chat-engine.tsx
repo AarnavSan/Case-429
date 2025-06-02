@@ -92,7 +92,7 @@ export default function ChatEngine({ onDecisionMade }: ChatEngineProps) {
         setMessages((prev) => [...prev, watsonMessage])
         setCurrentDecision(null)
         onSelect(value)
-        onDecisionMade?.(value)
+        // Don't call onDecisionMade here - let the specific handlers decide
       },
     }
     setCurrentDecision(decision)
@@ -104,6 +104,10 @@ export default function ChatEngine({ onDecisionMade }: ChatEngineProps) {
     ;(window as any).chatEngine = {
       pushMessages,
       pushDecision,
+      setHighlightAccuracy: (accuracy: number) => {
+        ;(window as any).chatEngine.highlightAccuracy = accuracy
+      },
+      highlightAccuracy: 0,
     }
   }, [])
 
